@@ -1,70 +1,74 @@
 #!/bin/bash
-# THIS DOES NOT WORK PROPERLY!
-# Counting and sorting of filetypes
-#Syntax: scriptnavn opsjon mappenavn
-#(Ex: oppg3b.sh -f mappe2)
-#Oppgave løst av 151709 (Joachim Strøm Ekelund)
+# $X = -f to only see files, -d for directories, -L for symbolic links
 
 clear
 
-#Definering av mappe
-mappe=`pwd`
-
-if [ -n "$2" ];
-then
-	mappe=$2
+# Assigns current folder
+if [[ ${#1} -le 2 ]]
+then folder=$(pwd)
+    else folder=$1
 fi
 
-while [ ! -d "$mappe" ]
-do
-	echo "$mappe finnes ikke"
-	echo "Prøv gjerne igjen"
-	read mappe
-done
-
-mappesti="$mappe/*"
-
-clear
-echo -e "Du oppga $mappe";
-
-#Tellefunksjon:
-for f in $mappesti
-do
-	if [[ -d "$f" ]]
-		then ((mapper++))
-	elif [[ -L "$f" ]]
-		then ((symlink++))
-	else
-		((filer++))
-	fi
-done
-
-
-#If setning for å se etter opsjoner:
-if [ -d $1 ]
-	then
-		echo "I mappen er det $filer filer, $mapper mapper og $symlink symbolske linker."
+# Check if $folder is valid
+if [[ -d $folder ]]
+then echo "Valid folder";
+    else echo "Not a valid folder";
 fi
 
-#While-loop til opsjoner:
-while getopts ":f :d :L :h" opt; do
-	case $opt in
-		f)
-			echo "I mappen er det $filer filer." >&2
-			;;
-		d)
-			echo "I mappen er det $mapper mapper." >&2
-			;;
-		L) 
-			echo "I mappen er det $symlink symbolske linker." >&2
-			;;
-		h)
-			echo "Forbruk: $usage"
-			exit >&2
-			;; 
-		\?)
-			echo "invalid option: -$OPTARG" 
-			exit >&2
-			;;
-	esac
+# Just adds slash and asterisk to the folder path
+folder="$folder/*"
+
+# Prints which directory is in use
+echo "Items in $folder will be counted.";
+
+# Sets variables
+folders=0
+files=0
+symlinks=0
+
+usage="Usage: ./count.sh [filepath] [args] (args may be -d, -L, -f, -h)";
+
+for item in $folder
+do
+    #If directory, and not symbolic link
+    if [[ -d "$item" && ! -L "$item" ]]
+        then ((folders++))
+    fi
+    # if symbolic link - any
+    if [[ -L "$item" ]]
+        then ((symlinks++))
+    fi
+    # If not directory, and not symbolic link
+    if [[ ! -d "$item" && ! -L "$item" ]]
+        then ((files++))
+    fi
+done
+
+# If no args were given; pwd folder, print all options.
+if [[ ${#1} == 0 ]]
+    then echo "Folders: $folders";
+        echo "Symbolic Links: $symlinks";
+        echo "Files: $files";
+fi
+
+# Print statements:
+while [[ $# -gt 0 ]] ;
+do
+    if [[ $1 != $(pwd) ]]
+        then opt="$1";
+        else opt="$2";
+    fi
+    shift;
+    case "$opt" in
+        "-d" )
+            echo "Folders: $folders";;
+        "-L" )
+            echo "Symbolic Links: $symlinks";;
+        "-f" )
+            echo "Files: $files";;
+        "-h" )
+            echo $usage;;
+        "-*" )
+            echo "Invalid Option."; exit 1;;
+    esac
 done
