@@ -50,7 +50,7 @@ do
 done
 
 # If no args were given; pwd folder, print all options.
-if [[ ${#1} == 0 ]]
+if [[ ${#1} == 0 || -d $1 ]]
     then echo "Folders: $folders";
         echo "Symbolic Links: $symlinks";
         echo "Files: $files";
