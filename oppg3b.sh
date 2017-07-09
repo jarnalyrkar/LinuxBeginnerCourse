@@ -15,8 +15,13 @@ then echo "Valid folder";
     else echo "Not a valid folder";
 fi
 
-# Just adds slash and asterisk to the folder path
-folder="$folder/*"
+pattern="^.*/$"
+
+# check if folder ends with a front slash
+if [[ $folder =~ $pattern ]]
+    then folder="$folder*"
+else folder="$folder/*"
+fi
 
 # Prints which directory is in use
 echo "Items in $folder will be counted.";
